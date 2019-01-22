@@ -196,7 +196,8 @@ This removes the matched text and then replaces it with a message stating that a
 ### Example
 You would like to gag the exit message in one of your favorite hangouts:
 
-    The huge oak doors that have stood the test of a thousand year's creak open ponderously, letting the harsh and unforgiving light of the outer realms into the snug and cozy bar (Don't for get to pay your tab or Grognog the Half Orc hobbit will come for your knees: 17% sales tax pplies and a 15% house gratuity for service. We do not accept personal cheques or cursed daggers. Please quaff responsibly.)
+    The huge oak doors that have stood the test of a thousand year's creak open ponderously, letting the harsh and unforgiving light of the outer realms into the snug and cozy bar.
+    (Don't forget to pay your tab, or Grognog the Half Orc -Hobbit- Halfling will come for your knees: 17% sales tax applies and a 15% house gratuity for service. We do not accept personal cheques or cursed daggers. Please quaff responsibly.)
     
 Ok that was cute the first time but... yeesh! So let's just slip 
 
@@ -300,3 +301,55 @@ This option just turns the feature on or off.
 There is no other option here because it's beautifully simple:- A small notification pops up with the matched text on it, and windows plays it's default chime.
 
 This is most useful for triggers that are set to fire when BeipMu is not in focus. For example, you already have a trigger that matches pages and colors them, but you can duplicate it, activate "Toast message when trigger hit" and disable any other outputs that your original trigger had. Then both will run when you're away form BeipMU but only the text highlight versionw ill run when BeipMu is in focus.
+
+## Sub Triggers
+
+Sub Triggers are a little more advanced. They're triggers that are run on a trigger. They can have sub triggers too - This is basically the part where you get to re-enact the plot of Inception. Remember how complex that got? Good: Let's see if we can simplify it!
+
+## Example
+
+Your game likes to send you messages using `Game>` - Now you can write a set of triggers that all start with `Game>` or you can use a sub trigger array.
+
+So your first trigger's matcheroo will use a way to capture the information you want.
+
+    ^Game\>(.*)
+    
+This captures all the lines starting with `Game`but captures everyting AFTER the prompt. Let's use an example of the things you might want to capture:
+
++ Game> Alex looked at you.
++ Game> Beth checked your stats.
++ Game> Grognog the Half Orc Halfling has put a bounty for unpaid bar tabs on you.
+
+With the above Regex, only the captured text (.\*) will be passed to teh sub triggers. If you wanted to run sub triggers on teh full text then you could use `Game\> .*`.
+
+To create a sub trigger, select your existing `Game>` trigger and click New. Or hit new and drag the trigger on top of `Game>` and it should show up as a sub.
+
+Inthe new trigger, set the Matcheroo to:
+
+    looked at you.
+    
+And then select 'Line ends with' and set the font to Bold in the Appearance tab, and select 'Whole line'.
+
+The result will be:
+
+   Game> **Alex looked at you.**
+
+You could then use the filter to add an eye emoji if you liked.
+
+The captured part of the original trigger is the part that each sub trigger will be operatingon. If you the sub trigger captures text itself youc an have a sub-sub trigger to act ont hat part.
+
+Each sub trigger can perform the fuill range of actions - Text style, color, and type, gags, replacements, etc.
+
+In this way you can have *some* `Game>` prompts marked as no-activity, and other play audio, or flash the whole or part of the line. e.g:
+
+    Input text: Game> Grognog the Half Orc Halfling has put a bounty for unpaid bar tabs on you.
+    Trigger: Game> (.*)
+    Action: Capture to Spawn window "Game Messages", set text to bold.
+        Input text from Trigger: Grognog the Half Orc Halfling has put a bounty for unpaid bar tabs on you.
+        Sub Trigger: .* has put a (bounty) for .* on you.
+        Action: highlight text bold, red.
+            Input text: bounty
+            Sub Trigger: bounty
+            Action: Flashing text.
+    
+Final output: Game> **Grognog the Half Orc Halfling has put a [Flash!]bounty[/Flash!] for unpaid bar tabs on you.**
